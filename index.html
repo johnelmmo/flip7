@@ -305,7 +305,7 @@ function calcTotalScore(data) {
 }
 
 function getDisplayCell(data) {
-  if (data.state === 'bust') return '0 💥';
+  if (data.state === 'bust') return '0💥';
   const b = getBaseScore(data), isF7 = countUniqueCards(data) >= 7;
   const stay = data.state === 'stay' ? ' <span class="status-icon">✓</span>' : '';
   return isF7 ? `${b} <span class="f7-tag">(+15) ✨</span>` : `${b}${stay}`;
