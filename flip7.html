@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Flip 7 Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #e6e0cc;
+    --card-body: #f7f1e0; 
+    --text: #1a1a1a; 
+    --surface: #ece5d3; 
+    --border: #b8af94;
+    --muted: #4a4539;
+    --accent-blue: #2563eb;
+    --accent-green: #166534;
+    --gold: #713f12;
+    --max-w: 500px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background-color: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .content-width { width: 100%; max-width: var(--max-w); display: flex; flex-direction: column; flex: 1; }
+
+  /* SETUP SCREEN */
+  #setup-screen { padding: 40px 24px; flex: 1; display: flex; flex-direction: column; width: 100%; }
+  h1 { font-family: 'Bebas Neue'; font-size: 5rem; text-align: center; margin-bottom: 25px; line-height: 1; }
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .mode-btn { background: var(--surface); border: 2px solid var(--border); color: var(--muted); padding: 15px 5px; border-radius: 12px; text-align: center; font-size: 0.75rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+  .mode-btn.selected { border-color: var(--text); color: var(--text); background: #fff; }
+  
+  #neg-toggle-container { display: none; }
+  .opt-row { display: flex; align-items: center; gap: 10px; color: var(--text); margin-bottom: 20px; font-size: 0.9rem; font-weight: bold; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 10px; width: 100%; }
+  
+  #player-list { margin-bottom: 10px; }
+  .player-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .player-row input { flex: 1; background: #fff; border: 2px solid var(--border); color: var(--text); padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; }
+  .del-btn { background: #fee2e2; border: 2px solid #f87171; color: #991b1b; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+  .add-player-link { background: none; border: none; color: var(--accent-blue); font-weight: bold; font-size: 0.9rem; cursor: pointer; text-decoration: underline; margin-bottom: 25px; padding: 5px; text-align: left; }
+  .primary-btn { width: 100%; padding: 20px; background: var(--text); border: none; border-radius: 16px; color: #fff; font-family: 'Bebas Neue'; font-size: 2rem; cursor: pointer; text-transform: uppercase; margin-top: auto; }
+
+  /* GAME SCREEN */
+  #game-screen { display: none; flex-direction: column; height: 100vh; width: 100%; }
+  .header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; background: var(--card-body); border-bottom: 2px solid var(--border); }
+  .header-btn { background:none; border:none; font-weight:bold; cursor:pointer; font-size: 0.75rem; text-transform: uppercase; }
+  #mode-title { font-family: 'Bebas Neue'; font-size: 1.8rem; }
+
+  .table-container { flex: 1; overflow: auto; padding: 10px 15px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; border: 2px solid var(--border); }
+  th { background: var(--surface); color: var(--muted); font-size: 0.6rem; text-transform: uppercase; padding: 8px; position: sticky; top: 0; }
+  td { text-align: center; padding: 10px 4px; border-bottom: 1px solid var(--surface); font-weight: bold; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+  .row-active { background: #fdf2d8; }
+  .cell-editing { outline: 3px solid var(--accent-blue); outline-offset: -3px; background: #eff6ff !important; }
+  
+  .winner-row td:first-child { 
+    border: 3px solid #22c55e !important; 
+    border-radius: 8px;
+    animation: pulse-win 1.5s infinite;
+    background: #f0fdf4 !important;
+  }
+  @keyframes pulse-win {
+    0% { box-shadow: 0 0 0 0px rgba(34, 197, 94, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0px rgba(34, 197, 94, 0); }
+  }
+
+  .f7-count { color: var(--accent-green); font-size: 0.65rem; display: block; }
+  .f7-tag { color: var(--accent-green); font-size: 0.65rem; font-weight: normal; }
+  .status-icon { margin-left: 2px; }
+
+  .controls { padding: 15px 20px 20px; background: var(--card-body); border-top: 2px solid var(--border); border-radius: 25px 25px 0 0; }
+  .current-info { display:flex; justify-content:space-between; align-items: baseline; margin-bottom: 8px; }
+  .active-name { font-family: 'Bebas Neue'; font-size: 1.5rem; }
+  .editing-label { font-size: 0.65rem; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 1px; }
+  .active-score { font-family: 'Bebas Neue'; font-size: 2rem; color: var(--accent-blue); }
+
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; }
+  .btn-num { aspect-ratio: 1; border: 2.5px solid currentColor; background: transparent; border-radius: 8px; font-family: 'Bebas Neue'; font-size: 1.3rem; cursor: pointer; }
+  .btn-num.disabled { opacity: 0.1; cursor: not-allowed; }
+  .btn-num.selected { background: var(--accent-green) !important; color: #fff !important; border-color: var(--accent-green) !important; }
+  .btn-num[data-n="1"] { color: #64748b; } .btn-num[data-n="2"] { color: #849101; }
+  .btn-num[data-n="3"] { color: #be123c; } .btn-num[data-n="4"] { color: #0891b2; }
+  .btn-num[data-n="5"] { color: #15803d; } .btn-num[data-n="6"] { color: #7e22ce; }
+  .btn-num[data-n="7"] { color: #c2410c; } .btn-num[data-n="8"] { color: #166534; }
+  .btn-num[data-n="9"] { color: #92400e; } .btn-num[data-n="10"]{ color: #b91c1c; }
+  .btn-num[data-n="11"]{ color: #1e40af; } .btn-num[data-n="12"]{ color: #78350f; }
+  .btn-num[data-n="13"]{ color: #1d4ed8; }
+
+  .mods-container { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .mods-row { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+  .btn-mod { padding: 8px 12px; background: #fff; border: 2px solid var(--border); border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0; }
+  .btn-mod.active { background: var(--accent-green); color: #fff; border-color: var(--accent-green); }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btn-action { padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-family: 'Bebas Neue'; font-size: 1.2rem; }
+  .bust { background: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
+  .stay { background: #dcfce7; color: #166534; border: 2px solid #4ade80; }
+  #live-save-btn { margin-bottom: 10px; background: var(--accent-blue); transition: background 0.3s; }
+  #live-save-btn.winner-state { background: #166534; }
+</style>
+</head>
+<body>
+
+<div class="content-width">
+  <div id="setup-screen">
+    <h1>FLIP 7</h1>
+    <div class="mode-grid">
+      <div class="mode-btn selected" id="m-f7" onclick="setMode('flip7')">FLIP 7</div>
+      <div class="mode-btn" id="m-vg" onclick="setMode('vengeance')">VENGEANCE</div>
+      <div class="mode-btn" id="m-bo" onclick="setMode('combo')">COMBO</div>
+    </div>
+    
+    <div id="neg-toggle-container">
+      <label class="opt-row"><input type="checkbox" id="opt-negatives"> <span>Allow Negative Scores</span></label>
+    </div>
+
+    <div id="player-list">
+      <div class="player-row"><input type="text" value="Player 1"></div>
+      <div class="player-row"><input type="text" value="Player 2"></div>
+    </div>
+    <button class="add-player-link" onclick="addPlayerRow()">+ Add Another Player</button>
+    <button class="primary-btn" onclick="start()">START SESSION</button>
+  </div>
+
+  <div id="game-screen">
+    <div class="header">
+      <button onclick="goHome()" class="header-btn" style="color: var(--muted)">← Home</button>
+      <h2 id="mode-title">FLIP 7</h2>
+      <button onclick="restartGame(true)" class="header-btn" style="color: #991b1b">New Game</button>
+    </div>
+    
+    <div style="text-align:center; padding: 5px; font-weight:bold; font-size: 0.8rem; background: var(--surface)">RD <span id="rd-num">1</span></div>
+
+    <div class="table-container">
+      <table id="score-table">
+        <thead><tr id="th-row"></tr></thead>
+        <tbody id="tb-body"></tbody>
+      </table>
+    </div>
+
+    <div class="controls">
+      <button class="primary-btn" id="live-save-btn" onclick="endRound()">SAVE ROUND & RESET</button>
+      <div class="current-info">
+        <div>
+          <div class="active-name" id="display-name">---</div>
+          <div class="editing-label" id="edit-context">Live Round</div>
+        </div>
+        <div id="display-score" class="active-score">0</div>
+      </div>
+      <div class="grid" id="num-grid"></div>
+      <div class="mods-container" id="mod-container"></div>
+      <div class="actions">
+        <button class="btn-action bust" onclick="doAction('bust')">BUST 💥</button>
+        <button class="btn-action stay" onclick="doAction('stay')">STAY ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let state = { 
+  activeGame: false,
+  mode:'flip7', players:[], round:1, history:[], current:[], 
+  active:0, editingRound: null, allowNegatives: false
+};
+
+// --- PREVENT ACCIDENTAL REFRESH ---
+window.addEventListener('beforeunload', (e) => {
+  if (state.activeGame) {
+    e.preventDefault();
+    e.returnValue = ''; // Standard browser requirement for refresh warning
+  }
+});
+
+function saveToCache() { localStorage.setItem('flip7_state', JSON.stringify(state)); }
+
+function loadFromCache() {
+  const saved = localStorage.getItem('flip7_state');
+  if (saved) {
+    state = JSON.parse(saved);
+    if (state.activeGame) showGame();
+  }
+}
+
+function setMode(m) {
+  state.mode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById(m==='flip7'?'m-f7':(m==='vengeance'?'m-vg':'m-bo')).classList.add('selected');
+  document.getElementById('neg-toggle-container').style.display = (m !== 'flip7') ? 'block' : 'none';
+}
+
+function addPlayerRow() {
+  const container = document.getElementById('player-list');
+  const div = document.createElement('div');
+  div.className = 'player-row';
+  div.innerHTML = `<input type="text" value="Player ${container.children.length + 1}"><button class="del-btn" onclick="this.parentElement.remove()">🗑️</button>`;
+  container.appendChild(div);
+}
+
+function start() {
+  state.players = Array.from(document.querySelectorAll('#player-list input')).map(i => i.value || "Unnamed");
+  state.allowNegatives = document.getElementById('opt-negatives').checked;
+  state.history = state.players.map(() => []);
+  state.round = 1;
+  state.activeGame = true;
+  resetCurrent();
+  showGame();
+  saveToCache();
+}
+
+function showGame() {
+  const titles = { flip7:'FLIP 7', vengeance:'VENGEANCE', combo:'COMBO' };
+  document.getElementById('mode-title').innerText = titles[state.mode];
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('game-screen').style.display='flex';
+  render();
+}
+
+function resetCurrent() {
+  state.current = state.players.map(() => ({ cards:[], mods:[], state:'playing' }));
+  state.active = 0;
+  state.editingRound = null;
+}
+
+function countUniqueCards(data) {
+  const u = new Set(data.cards);
+  let c = u.size;
+  if (data.cards.filter(x => x===13).length === 2) c += 1;
+  return c;
+}
+
+function getBaseScore(data) {
+  if (data.state === 'bust') return 0;
+  let s = data.cards.reduce((a, b) => a + b, 0);
+  data.mods.forEach(m => {
+    if (m==='×2') s*=2; if (m==='÷2') s=Math.floor(s/2);
+    if (m.includes('+')) s+=parseInt(m.replace('+',''));
+    if (m.includes('-')) s-=parseInt(m.replace('-',''));
+  });
+  return (!state.allowNegatives) ? Math.max(0, s) : s;
+}
+
+function calcTotalScore(data) {
+  let s = getBaseScore(data);
+  if (data.state !== 'bust' && countUniqueCards(data) >= 7) s += 15;
+  return (!state.allowNegatives) ? Math.max(0, s) : s;
+}
+
+function getDisplayCell(data) {
+  if (data.state === 'bust') return '0 💥';
+  const b = getBaseScore(data), isF7 = countUniqueCards(data) >= 7;
+  const stay = data.state === 'stay' ? ' <span class="status-icon">✓</span>' : '';
+  return isF7 ? `${b} <span class="f7-tag">(+15) ✨</span>` : `${b}${stay}`;
+}
+
+function toggleNum(n) {
+  const data = (state.editingRound === null) ? state.current[state.active] : state.history[state.active][state.editingRound];
+  const isSel = data.cards.includes(n) || (n === 13 && data.cards.filter(x => x === 13).length > 0);
+  if (!isSel && countUniqueCards(data) >= 7) return;
+  if (n === 13) {
+    const c = data.cards.filter(x => x === 13).length;
+    if (c < 2) data.cards.push(13); else data.cards = data.cards.filter(x => x !== 13);
+  } else {
+    data.cards.includes(n) ? data.cards = data.cards.filter(x => x !== n) : data.cards.push(n);
+  }
+  if (countUniqueCards(data) >= 7) data.state = 'stay';
+  saveToCache(); render();
+}
+
+function toggleMod(m) {
+  const data = (state.editingRound === null) ? state.current[state.active] : state.history[state.active][state.editingRound];
+  data.mods.includes(m) ? data.mods = data.mods.filter(x => x !== m) : data.mods.push(m);
+  saveToCache(); render();
+}
+
+function doAction(t) {
+  const data = (state.editingRound === null) ? state.current[state.active] : state.history[state.active][state.editingRound];
+  data.state = t;
+  saveToCache(); render();
+}
+
+function editHistorical(p, r) { state.active = p; state.editingRound = r; render(); }
+function selectPlayer(p) { state.active = p; state.editingRound = null; render(); }
+
+function render() {
+  const activeData = (state.editingRound === null) ? state.current[state.active] : state.history[state.active][state.editingRound];
+  document.getElementById('display-name').innerText = state.players[state.active];
+  document.getElementById('edit-context').innerText = state.editingRound === null ? 'Live Round' : `Editing Round ${state.editingRound + 1}`;
+  document.getElementById('display-score').innerText = activeData.state === 'playing' ? calcTotalScore(activeData) : (activeData.state === 'bust' ? 'BUST 💥' : 'STAY ✓');
+  document.getElementById('rd-num').innerText = state.round;
+
+  let head = `<th>Player</th>`;
+  for(let i=1; i<=state.round; i++) head += `<th>R${i}</th>`;
+  head += `<th>Total</th>`;
+  document.getElementById('th-row').innerHTML = head;
+
+  let totals = state.players.map((_, i) => {
+    let t = state.history[i].reduce((sum, h) => sum + calcTotalScore(h), 0);
+    return t + calcTotalScore(state.current[i]);
+  });
+
+  let maxScore = Math.max(...totals);
+  let winningIdx = (maxScore >= 200) ? totals.indexOf(maxScore) : -1;
+  
+  const saveBtn = document.getElementById('live-save-btn');
+  if (winningIdx !== -1) {
+    saveBtn.innerText = "FINISH GAME 🎉";
+    saveBtn.classList.add('winner-state');
+  } else {
+    saveBtn.innerText = "SAVE ROUND & RESET";
+    saveBtn.classList.remove('winner-state');
+  }
+
+  let bodyHtml = '';
+  state.players.forEach((name, pIdx) => {
+    let roundCells = '';
+    state.history[pIdx].forEach((h, r) => {
+      roundCells += `<td class="${(state.active===pIdx && state.editingRound===r)?'cell-editing':''}" onclick="editHistorical(${pIdx}, ${r})">${getDisplayCell(h)}</td>`;
+    });
+    roundCells += `<td class="${(state.active===pIdx && state.editingRound===null)?'cell-editing':''}" onclick="selectPlayer(${pIdx})">${getDisplayCell(state.current[pIdx])}</td>`;
+    for(let j=state.history[pIdx].length+1; j<state.round; j++) roundCells += `<td>-</td>`;
+    
+    const f7 = state.history[pIdx].filter(h => countUniqueCards(h) >= 7).length + (countUniqueCards(state.current[pIdx]) >= 7 ? 1 : 0);
+    const isWinner = pIdx === winningIdx;
+
+    bodyHtml += `<tr class="${pIdx===state.active?'row-active':''} ${isWinner?'winner-row':''}">
+      <td style="text-align:left; padding-left:10px;" onclick="selectPlayer(${pIdx})">${isWinner?'🎆 ':''}${name}${isWinner?' 🎆':''}${f7>0?`<span class="f7-count">F7: ${f7}</span>`:''}</td>
+      ${roundCells}
+      <td style="color:var(--gold); border-left: 1px solid var(--border)">${totals[pIdx]}</td>
+    </tr>`;
+  });
+  document.getElementById('tb-body').innerHTML = bodyHtml;
+
+  let gridHtml = ''; const uC = countUniqueCards(activeData);
+  for(let i=1; i<=12; i++) {
+    const sel = activeData.cards.includes(i);
+    gridHtml += `<button class="btn-num ${sel?'selected':''} ${(!sel && uC>=7)?'disabled':''}" data-n="${i}" onclick="toggleNum(${i})">${i}</button>`;
+  }
+  const c13 = activeData.cards.filter(x => x===13).length;
+  gridHtml += `<button class="btn-num ${c13>=1?'selected':''} ${c13===0 && uC>=7?'disabled':''}" data-n="13" onclick="toggleNum(13)">13</button>`;
+  if(state.mode !== 'flip7') gridHtml += `<button class="btn-num ${c13>=2?'selected':''} ${c13<2 && uC>=7?'disabled':''}" data-n="13" onclick="toggleNum(13)">13</button>`;
+  document.getElementById('num-grid').innerHTML = gridHtml;
+
+  const pos = ['×2','+2','+4','+6','+8','+10'], neg = ['÷2','-2','-4','-6','-8','-10'];
+  document.getElementById('mod-container').innerHTML = (state.mode==='flip7'?renderRow(pos):(state.mode==='vengeance'?renderRow(neg):renderRow(pos)+renderRow(neg)));
+}
+
+function renderRow(l) { return `<div class="mods-row">${l.map(m=>`<button class="btn-mod ${(state.editingRound === null ? state.current[state.active] : state.history[state.active][state.editingRound]).mods.includes(m)?'active':''}" onclick="toggleMod('${m}')">${m}</button>`).join('')}</div>`; }
+
+function endRound() {
+  const totals = state.players.map((_, i) => {
+    let t = state.history[i].reduce((sum, h) => sum + calcTotalScore(h), 0);
+    return t + calcTotalScore(state.current[i]);
+  });
+  
+  if (Math.max(...totals) >= 200) {
+    if(confirm("Game Over! Restart this mode with the same players?")) {
+      restartGame(false);
+    }
+    return;
+  }
+
+  state.players.forEach((_, i) => {
+    state.history[i].push({
+      ...state.current[i], 
+      cards: [...state.current[i].cards], 
+      mods: [...state.current[i].mods]
+    });
+  });
+  state.round++;
+  resetCurrent();
+  saveToCache();
+  render();
+}
+
+function goHome() {
+  document.getElementById('game-screen').style.display='none';
+  document.getElementById('setup-screen').style.display='flex';
+}
+
+function restartGame(ask) {
+  if(!ask || confirm("Wipe scores and restart this session?")) {
+    state.history = state.players.map(() => []);
+    state.round = 1;
+    resetCurrent();
+    saveToCache();
+    render();
+  }
+}
+
+window.onload = loadFromCache;
+</script>
+</body>
+</html>
