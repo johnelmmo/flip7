@@ -21,7 +21,6 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   
-  /* svh handles the mobile address bar height issue */
   body { 
     background-color: var(--bg); 
     color: var(--text); 
@@ -40,6 +39,7 @@
     display: flex; 
     flex-direction: column; 
     height: 100%; 
+    overflow: hidden;
   }
 
   /* SETUP SCREEN */
@@ -71,8 +71,7 @@
   #game-screen { 
     display: none; 
     flex-direction: column; 
-    height: 100vh; 
-    height: 100svh;
+    height: 100%;
     width: 100%; 
     overflow: hidden; 
   }
@@ -92,11 +91,13 @@
 
   .round-indicator { text-align:center; padding: 5px; font-weight:bold; font-size: 0.8rem; background: var(--surface); flex-shrink: 0; }
 
+  /* CRITICAL FIX: Allowing table to shrink to make room for controls */
   .table-container { 
-    flex: 1; 
+    flex: 1 1 0%; 
+    min-height: 0;
     overflow-y: auto; 
     overflow-x: auto; 
-    padding: 10px 15px; 
+    padding: 8px 15px; 
     -webkit-overflow-scrolling: touch;
   }
   table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; border: 2px solid var(--border); }
@@ -121,21 +122,22 @@
   .f7-tag { color: var(--accent-green); font-size: 0.65rem; font-weight: normal; }
   .status-icon { margin-left: 2px; }
 
+  /* TIGHTENED CONTROLS AREA */
   .controls { 
-    padding: 15px 20px; 
+    padding: 10px 15px; 
     background: var(--card-body); 
     border-top: 2px solid var(--border); 
-    border-radius: 25px 25px 0 0; 
+    border-radius: 20px 20px 0 0; 
     flex-shrink: 0;
-    padding-bottom: calc(15px + env(safe-area-inset-bottom));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
-  .current-info { display:flex; justify-content:space-between; align-items: baseline; margin-bottom: 8px; }
+  .current-info { display:flex; justify-content:space-between; align-items: baseline; margin-bottom: 4px; }
   .active-name { font-family: 'Bebas Neue'; font-size: 1.5rem; }
   .editing-label { font-size: 0.65rem; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 1px; }
-  .active-score { font-family: 'Bebas Neue'; font-size: 2rem; color: var(--accent-blue); }
+  .active-score { font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--accent-blue); }
 
-  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; }
-  .btn-num { aspect-ratio: 1; border: 2.5px solid currentColor; background: #fff; border-radius: 8px; font-family: 'Bebas Neue'; font-size: 1.3rem; cursor: pointer; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; }
+  .btn-num { aspect-ratio: 1; border: 2.5px solid currentColor; background: #fff; border-radius: 8px; font-family: 'Bebas Neue'; font-size: 1.1rem; cursor: pointer; }
   .btn-num.disabled { opacity: 0.1; cursor: not-allowed; }
   .btn-num.selected { background: var(--accent-green) !important; color: #fff !important; border-color: var(--accent-green) !important; }
   .btn-num[data-n="1"] { color: #64748b; } .btn-num[data-n="2"] { color: #849101; }
@@ -146,16 +148,16 @@
   .btn-num[data-n="11"]{ color: #1e40af; } .btn-num[data-n="12"]{ color: #78350f; }
   .btn-num[data-n="13"]{ color: #1d4ed8; }
 
-  .mods-container { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .mods-container { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
   .mods-row { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
   .btn-mod { padding: 8px 12px; background: #fff; border: 2px solid var(--border); border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0; }
   .btn-mod.active { background: var(--accent-green); color: #fff; border-color: var(--accent-green); }
 
   .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .btn-action { padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-family: 'Bebas Neue'; font-size: 1.2rem; }
+  .btn-action { padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; font-family: 'Bebas Neue'; font-size: 1.1rem; }
   .bust { background: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
   .stay { background: #dcfce7; color: #166534; border: 2px solid #4ade80; }
-  #live-save-btn { margin-bottom: 10px; background: var(--accent-blue); transition: background 0.3s; flex-shrink: 0; }
+  #live-save-btn { padding: 15px; margin-bottom: 8px; background: var(--accent-blue); border: none; border-radius: 12px; color: #fff; font-family: 'Bebas Neue'; font-size: 1.5rem; cursor: pointer; text-transform: uppercase; transition: background 0.3s; flex-shrink: 0; width: 100%; }
   #live-save-btn.winner-state { background: #166534; }
 </style>
 </head>
@@ -199,7 +201,7 @@
     </div>
 
     <div class="controls">
-      <button class="primary-btn" id="live-save-btn" onclick="endRound()">SAVE ROUND & RESET</button>
+      <button id="live-save-btn" onclick="endRound()">SAVE ROUND & RESET</button>
       <div class="current-info">
         <div>
           <div class="active-name" id="display-name">---</div>
