@@ -406,9 +406,17 @@ function render() {
     const sel = activeData.cards.includes(i);
     gridHtml += `<button class="btn-num ${sel?'selected':''} ${(!sel && uC>=7)?'disabled':''}" data-n="${i}" onclick="toggleNum(${i})">${i}</button>`;
   }
+/* Around line 347 */
   const c13 = activeData.cards.filter(x => x===13).length;
-  gridHtml += `<button class="btn-num ${c13>=1?'selected':''} ${c13===0 && uC>=7?'disabled':''}" data-n="13" onclick="toggleNum(13)">13</button>`;
-  if(state.mode !== 'flip7') gridHtml += `<button class="btn-num ${c13>=2?'selected':''} ${c13<2 && uC>=7?'disabled':''}" data-n="13" onclick="toggleNum(13)">13</button>`;
+  
+  // Only show 13 buttons if we are NOT in regular Flip 7 mode
+  if(state.mode !== 'flip7') {
+    // First 13
+    gridHtml += `<button class="btn-num ${c13>=1?'selected':''} ${c13===0 && uC>=7?'disabled':''}" data-n="13" onclick="toggleNum(13)">13</button>`;
+    // Second 13
+    gridHtml += `<button class="btn-num ${c13>=2?'selected':''} ${c13<2 && uC>=7?'disabled':''}" data-n="13" onclick="toggleNum(13)">13</button>`;
+  }
+  
   document.getElementById('num-grid').innerHTML = gridHtml;
 
   const pos = ['×2','+2','+4','+6','+8','+10'], neg = ['÷2','-2','-4','-6','-8','-10'];
