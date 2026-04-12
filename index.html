@@ -325,9 +325,13 @@ function toggleNum(n) {
   const data = (state.editingRound === null) ? state.current[state.active] : state.history[state.active][state.editingRound];
   const isSel = data.cards.includes(n) || (n === 13 && data.cards.filter(x => x === 13).length > 0);
   if (!isSel && countUniqueCards(data) >= 7) return;
-  if (n === 13) {
+if (n === 13) {
+    // Hard block: if regular Flip 7, 13 doesn't exist.
+    if (state.mode === 'flip7') return; 
+
     const c = data.cards.filter(x => x === 13).length;
-    if (c < 2) data.cards.push(13); else data.cards = data.cards.filter(x => x !== 13);
+    if (c < 2) data.cards.push(13); 
+    else data.cards = data.cards.filter(x => x !== 13);
   } else {
     data.cards.includes(n) ? data.cards = data.cards.filter(x => x !== n) : data.cards.push(n);
   }
