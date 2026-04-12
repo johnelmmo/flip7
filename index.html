@@ -53,46 +53,55 @@
       z-index: 2;
     }
 
-    /* --- FIREWORKS SYSTEM --- */
-    @keyframes firework {
-      0% { transform: translate(var(--x), var(--initialY)); width: 0.5vmin; opacity: 1; }
-      50% { width: 0.5vmin; opacity: 1; }
-      100% { width: 45vmin; opacity: 0; }
-    }
+/* --- OPTIMIZED FIREWORKS SYSTEM --- */
+@keyframes firework {
+  0% { 
+    transform: translate(var(--x), 100vh); 
+    scale: 0.5; 
+    opacity: 1; 
+  }
+  50% { 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translate(var(--x), var(--y)); 
+    scale: 10; 
+    opacity: 0; 
+  }
+}
 
-    .firework, .firework::before, .firework::after {
-      --initialY: 100vh;
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 0.5vmin;
-      aspect-ratio: 1;
-      background: 
-        radial-gradient(circle, var(--gold) 0.2vmin, #0000 0) 50% 00%,
-        radial-gradient(circle, var(--accent-green) 0.3vmin, #0000 0) 00% 50%,
-        radial-gradient(circle, var(--gold) 0.5vmin, #0000 0) 50% 99%,
-        radial-gradient(circle, var(--accent-blue) 0.2vmin, #0000 0) 99% 50%,
-        radial-gradient(circle, #fff 0.3vmin, #0000 0) 80% 90%,
-        radial-gradient(circle, var(--gold) 0.5vmin, #0000 0) 95% 90%,
-        radial-gradient(circle, #fff 0.2vmin, #0000 0) 10% 60%,
-        radial-gradient(circle, var(--accent-green) 0.2vmin, #0000 0) 31% 80%;
-      background-size: 0.5vmin 0.5vmin;
-      background-repeat: no-repeat;
-      display: none;
-    }
+.firework, .firework::before, .firework::after {
+  content: "";
+  position: absolute;
+  top: 0%; /* Start from a fixed point to prevent layout jumps */
+  left: 50%;
+  width: 5vmin;
+  aspect-ratio: 1;
+  background: 
+    radial-gradient(circle, var(--gold) 0.2vmin, #0000 0) 50% 00%,
+    radial-gradient(circle, var(--accent-green) 0.3vmin, #0000 0) 00% 50%,
+    radial-gradient(circle, var(--gold) 0.5vmin, #0000 0) 50% 99%,
+    radial-gradient(circle, var(--accent-blue) 0.2vmin, #0000 0) 99% 50%,
+    radial-gradient(circle, #fff 0.3vmin, #0000 0) 80% 90%,
+    radial-gradient(circle, var(--gold) 0.5vmin, #0000 0) 95% 90%,
+    radial-gradient(circle, #fff 0.2vmin, #0000 0) 10% 60%,
+    radial-gradient(circle, var(--accent-green) 0.2vmin, #0000 0) 31% 80%;
+  background-size: 0.5vmin 0.5vmin;
+  background-repeat: no-repeat;
+  display: none;
+  pointer-events: none; /* Ensure they don't block clicks */
+}
 
-    .firework { --x: -30vw; }
-    .firework:nth-child(2) { --x: 30vw; --initialY: 90vh; }
-    .firework:nth-child(3) { --x: -10vw; --initialY: 95vh; }
+.firework { --x: -30vw; --y: 20vh; }
+.firework:nth-child(2) { --x: 25vw; --y: 15vh; animation-delay: -0.5s; }
+.firework:nth-child(3) { --x: -5vw; --y: 30vh; animation-delay: -1.2s; }
 
-    body.has-winner .firework,
-    body.has-winner .firework::before,
-    body.has-winner .firework::after {
-      display: block;
-      animation: firework 2s infinite;
-    }
+body.has-winner .firework,
+body.has-winner .firework::before,
+body.has-winner .firework::after {
+  display: block;
+  animation: firework 2s infinite ease-out;
+}
 
     /* SETUP SCREEN */
     #setup-screen { padding: 40px 24px; flex: 1; display: flex; flex-direction: column; width: 100%; overflow-y: auto; }
