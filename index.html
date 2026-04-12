@@ -49,12 +49,12 @@
       display: flex; 
       flex-direction: column; 
       height: 100%; 
-      overflow: hidden;
+      overflow: visible; /* Essential for fireworks to bleed out */
       z-index: 2;
       position: relative;
     }
 
-    /* --- REFINED FIREWORKS SYSTEM --- */
+    /* --- ASYMMETRIC ORGANIC FIREWORKS --- */
     .fireworks-layer {
       position: absolute;
       top: 0;
@@ -62,8 +62,8 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 100; /* Bring to front of container */
-      overflow: visible; /* Allow particles to bleed out of the 500px container */
+      z-index: 1; /* Sits behind UI but above background */
+      overflow: visible; 
       visibility: hidden;
     }
 
@@ -72,42 +72,51 @@
     }
 
     @keyframes firework {
-      0% { transform: translateY(100vh) scale(0.3); opacity: 1; }
-      50% { opacity: 1; }
-      100% { transform: translateY(var(--y)) scale(5); opacity: 0; }
+      0% { transform: translateY(90vh) scale(0.2); opacity: 1; }
+      30% { opacity: 1; }
+      100% { transform: translateY(var(--y)) scale(var(--s)); opacity: 0; }
     }
 
     .firework, .firework::before, .firework::after {
       content: "";
       position: absolute;
       top: 0;
-      width: 3vmin; /* Smaller base size */
+      width: 4vmin;
       aspect-ratio: 1;
       background: 
-        radial-gradient(circle, var(--gold) 0.15vmin, #0000 0) 50% 0%,
-        radial-gradient(circle, var(--accent-green) 0.15vmin, #0000 0) 0% 50%,
-        radial-gradient(circle, var(--gold) 0.2vmin, #0000 0) 50% 99%,
-        radial-gradient(circle, var(--accent-blue) 0.15vmin, #0000 0) 99% 50%,
-        radial-gradient(circle, #fff 0.15vmin, #0000 0) 80% 90%,
-        radial-gradient(circle, var(--gold) 0.2vmin, #0000 0) 95% 90%,
-        radial-gradient(circle, #fff 0.15vmin, #0000 0) 10% 60%,
-        radial-gradient(circle, var(--accent-green) 0.15vmin, #0000 0) 31% 80%;
-      background-size: 0.4vmin 0.4vmin;
+        radial-gradient(circle, #fff 0.1vmin, #0000 0) 10% 10%,
+        radial-gradient(circle, var(--gold) 0.3vmin, #0000 0) 50% 0%,
+        radial-gradient(circle, var(--accent-green) 0.1vmin, #0000 0) 0% 50%,
+        radial-gradient(circle, var(--accent-blue) 0.4vmin, #0000 0) 90% 20%,
+        radial-gradient(circle, #fff 0.05vmin, #0000 0) 80% 90%,
+        radial-gradient(circle, var(--gold) 0.2vmin, #0000 0) 95% 70%,
+        radial-gradient(circle, var(--accent-green) 0.15vmin, #0000 0) 20% 80%,
+        radial-gradient(circle, #fff 0.25vmin, #0000 0) 40% 40%;
+      background-size: 0.5vmin 0.5vmin;
       background-repeat: no-repeat;
     }
 
     body.has-winner .firework, 
     body.has-winner .firework::before, 
     body.has-winner .firework::after { 
-      animation: firework 1.8s infinite ease-out; 
+      animation: firework var(--d) infinite ease-out; 
     }
 
-    .firework:nth-child(1) { left: 10%; --y: 15vh; }
-    .firework:nth-child(2) { left: 90%; --y: 10vh; animation-delay: -0.4s; }
-    .firework:nth-child(3) { left: 50%; --y: 20vh; animation-delay: -1.1s; }
+    /* Positioning and Variety */
+    .firework:nth-child(1) { left: 5%;  --y: 15vh; --s: 6; --d: 1.6s; }
+    .firework:nth-child(2) { left: 90%; --y: 25vh; --s: 4; --d: 2.2s; animation-delay: -0.4s; }
+    .firework:nth-child(3) { left: 45%; --y: 10vh; --s: 9; --d: 1.9s; animation-delay: -1.2s; }
+    .firework:nth-child(4) { left: 20%; --y: 35vh; --s: 5; --d: 2.6s; animation-delay: -0.8s; }
+    .firework:nth-child(5) { left: 95%; --y: 40vh; --s: 7; --d: 2.0s; animation-delay: -1.5s; }
 
-    /* SETUP SCREEN */
-    #setup-screen { padding: 40px 24px; flex: 1; display: flex; flex-direction: column; width: 100%; overflow-y: auto; z-index: 10; }
+    .firework::before { transform: rotate(120deg); }
+    .firework::after { transform: rotate(240deg); }
+
+    /* UI SCREENS (Higher Z-Index) */
+    #setup-screen, #game-screen { position: relative; z-index: 10; }
+
+    /* --- REST OF STYLES --- */
+    #setup-screen { padding: 40px 24px; flex: 1; display: flex; flex-direction: column; width: 100%; overflow-y: auto; }
     h1 { font-family: 'Bebas Neue'; font-size: 5rem; text-align: center; margin-bottom: 25px; line-height: 1; }
     .mode-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .mode-btn { background: var(--surface); border: 2px solid var(--border); color: var(--muted); padding: 15px 5px; border-radius: 12px; text-align: center; font-size: 0.75rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
@@ -120,8 +129,7 @@
     .add-player-link { background: none; border: none; color: var(--accent-blue); font-weight: bold; font-size: 0.9rem; cursor: pointer; text-decoration: underline; margin-bottom: 25px; text-align: left; }
     .primary-btn { width: 100%; padding: 20px; background: var(--text); border: none; border-radius: 16px; color: #fff; font-family: 'Bebas Neue'; font-size: 2rem; cursor: pointer; text-transform: uppercase; }
 
-    /* GAME SCREEN */
-    #game-screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow: hidden; z-index: 10; position: relative; }
+    #game-screen { display: none; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
     .header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; background: var(--card-body); border-bottom: 2px solid var(--border); padding-top: max(12px, env(safe-area-inset-top)); }
     .header-btn { background:none; border:none; font-weight:bold; cursor:pointer; font-size: 0.75rem; text-transform: uppercase; }
     #mode-title { font-family: 'Bebas Neue'; font-size: 1.8rem; }
@@ -134,19 +142,16 @@
     .cell-editing { outline: 3px solid var(--accent-blue); outline-offset: -3px; background: #eff6ff !important; }
     
     .winner-row td:first-child { border: 3px solid #22c55e !important; border-radius: 8px; background: #f0fdf4 !important; }
-
     .f7-count { color: var(--accent-green); font-size: 0.65rem; display: block; }
-    .f7-tag { color: var(--accent-green); font-size: 0.65rem; font-weight: normal; }
 
     .controls { padding: 10px 15px; background: var(--card-body); border-top: 2px solid var(--border); border-radius: 20px 20px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
     .current-info { display:flex; justify-content:space-between; align-items: baseline; margin-bottom: 4px; }
     .active-name { font-family: 'Bebas Neue'; font-size: 1.5rem; }
-    .editing-label { font-size: 0.65rem; color: var(--accent-blue); text-transform: uppercase; }
     .active-score { font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--accent-blue); }
 
     .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; }
     .btn-num { aspect-ratio: 1; border: 2.5px solid currentColor; background: #fff; border-radius: 8px; font-family: 'Bebas Neue'; font-size: 1.1rem; cursor: pointer; }
-    .btn-num.disabled { opacity: 0.1; cursor: not-allowed; }
+    .btn-num.disabled { opacity: 0.1; }
     .btn-num.selected { background: var(--accent-green) !important; color: #fff !important; border-color: var(--accent-green) !important; }
     
     .btn-num[data-n="0"] { color: #94a3b8; } .btn-num[data-n="1"] { color: #64748b; } 
@@ -157,16 +162,15 @@
     .btn-num[data-n="10"]{ color: #b91c1c; } .btn-num[data-n="11"]{ color: #1e40af; } 
     .btn-num[data-n="12"]{ color: #78350f; } .btn-num[data-n="13"]{ color: #1d4ed8; }
 
-    .mods-container { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
-    .mods-row { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
-    .btn-mod { padding: 8px 12px; background: #fff; border: 2px solid var(--border); border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; white-space: nowrap; }
+    .mods-row { display: flex; gap: 5px; overflow-x: auto; margin-bottom: 8px; }
+    .btn-mod { padding: 8px 12px; background: #fff; border: 2px solid var(--border); border-radius: 8px; font-weight: bold; font-size: 0.75rem; }
     .btn-mod.active { background: var(--accent-green); color: #fff; border-color: var(--accent-green); }
 
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .btn-action { padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; font-family: 'Bebas Neue'; font-size: 1.1rem; }
+    .btn-action { padding: 10px; border-radius: 10px; font-weight: bold; font-family: 'Bebas Neue'; font-size: 1.1rem; }
     .bust { background: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
     .stay { background: #dcfce7; color: #166534; border: 2px solid #4ade80; }
-    #live-save-btn { padding: 15px; margin-bottom: 8px; background: var(--accent-blue); border: none; border-radius: 12px; color: #fff; font-family: 'Bebas Neue'; font-size: 1.5rem; cursor: pointer; width: 100%; }
+    #live-save-btn { padding: 15px; margin-bottom: 8px; background: var(--accent-blue); border-radius: 12px; color: #fff; font-family: 'Bebas Neue'; font-size: 1.5rem; width: 100%; border: none; }
     #live-save-btn.winner-state { background: #166534; }
   </style>
 </head>
@@ -174,6 +178,8 @@
 
 <div class="content-width">
   <div class="fireworks-layer">
+    <div class="firework"></div>
+    <div class="firework"></div>
     <div class="firework"></div>
     <div class="firework"></div>
     <div class="firework"></div>
@@ -188,7 +194,7 @@
     </div>
     
     <div id="neg-toggle-container" style="display:none;">
-      <label class="opt-row"><input type="checkbox" id="opt-negatives"> <span>Allow Negative Scores</span></label>
+      <label><input type="checkbox" id="opt-negatives"> Allow Negatives</label>
     </div>
 
     <div id="player-list">
@@ -220,7 +226,7 @@
       <div class="current-info">
         <div>
           <div class="active-name" id="display-name">---</div>
-          <div class="editing-label" id="edit-context">Live Round</div>
+          <div id="edit-context" style="font-size: 0.65rem; color: var(--accent-blue); text-transform: uppercase;">Live Round</div>
         </div>
         <div id="display-score" class="active-score">0</div>
       </div>
@@ -235,19 +241,12 @@
 </div>
 
 <script>
-let state = { 
-  activeGame: false, mode:'flip7', players:[], round:1, history:[], 
-  current:[], active:0, editingRound: null, allowNegatives: false
-};
+let state = { activeGame: false, mode:'flip7', players:[], round:1, history:[], current:[], active:0, editingRound: null, allowNegatives: false };
 
 function saveToCache() { localStorage.setItem('flip7_state', JSON.stringify(state)); }
-
 function loadFromCache() {
   const saved = localStorage.getItem('flip7_state');
-  if (saved) {
-    state = JSON.parse(saved);
-    if (state.activeGame) showGame();
-  }
+  if (saved) { state = JSON.parse(saved); if (state.activeGame) showGame(); }
 }
 
 function setMode(m) {
@@ -314,20 +313,12 @@ function calcTotalScore(data) {
   return (!state.allowNegatives) ? Math.max(0, s) : s;
 }
 
-function getDisplayCell(data) {
-  if (data.state === 'bust') return '0💥';
-  const b = getBaseScore(data), isF7 = countUniqueCards(data) >= 7;
-  const stay = data.state === 'stay' ? ' <span class="status-icon">✓</span>' : '';
-  return isF7 ? `${b} <span class="f7-tag">(+15) ✨</span>` : `${b}${stay}`;
-}
-
 function toggleNum(n) {
   const data = (state.editingRound === null) ? state.current[state.active] : state.history[state.active][state.editingRound];
   if (n === 13) {
     if (state.mode === 'flip7') return; 
     const c = data.cards.filter(x => x === 13).length;
-    if (c < 2) data.cards.push(13); 
-    else data.cards = data.cards.filter(x => x !== 13);
+    if (c < 2) data.cards.push(13); else data.cards = data.cards.filter(x => x !== 13);
   } else {
     data.cards.includes(n) ? data.cards = data.cards.filter(x => x !== n) : data.cards.push(n);
   }
@@ -353,7 +344,6 @@ function selectPlayer(p) { state.active = p; state.editingRound = null; render()
 function render() {
   const activeData = (state.editingRound === null) ? state.current[state.active] : state.history[state.active][state.editingRound];
   document.getElementById('display-name').innerText = state.players[state.active];
-  document.getElementById('edit-context').innerText = state.editingRound === null ? 'Live Round' : `Editing Round ${state.editingRound + 1}`;
   document.getElementById('display-score').innerText = activeData.state === 'playing' ? calcTotalScore(activeData) : (activeData.state === 'bust' ? 'BUST 💥' : 'STAY ✓');
   document.getElementById('rd-num').innerText = state.round;
 
@@ -362,99 +352,58 @@ function render() {
   head += `<th>Total</th>`;
   document.getElementById('th-row').innerHTML = head;
 
-  let totals = state.players.map((_, i) => {
-    let t = state.history[i].reduce((sum, h) => sum + calcTotalScore(h), 0);
-    return t + calcTotalScore(state.current[i]);
-  });
-
+  let totals = state.players.map((_, i) => state.history[i].reduce((sum, h) => sum + calcTotalScore(h), 0) + calcTotalScore(state.current[i]));
   let maxScore = Math.max(...totals);
   let winningIdx = (maxScore >= 200) ? totals.indexOf(maxScore) : -1;
   
-  if (winningIdx !== -1) document.body.classList.add('has-winner');
-  else document.body.classList.remove('has-winner');
-
+  document.body.classList.toggle('has-winner', winningIdx !== -1);
   const saveBtn = document.getElementById('live-save-btn');
-  if (winningIdx !== -1) {
-    saveBtn.innerText = "FINISH GAME 🎉";
-    saveBtn.classList.add('winner-state');
-  } else {
-    saveBtn.innerText = "SAVE ROUND & RESET";
-    saveBtn.classList.remove('winner-state');
-  }
+  saveBtn.innerText = (winningIdx !== -1) ? "FINISH GAME 🎉" : "SAVE ROUND & RESET";
+  saveBtn.classList.toggle('winner-state', winningIdx !== -1);
 
   let bodyHtml = '';
   state.players.forEach((name, pIdx) => {
     let roundCells = '';
     state.history[pIdx].forEach((h, r) => {
-      roundCells += `<td class="${(state.active===pIdx && state.editingRound===r)?'cell-editing':''}" onclick="editHistorical(${pIdx}, ${r})">${getDisplayCell(h)}</td>`;
+      roundCells += `<td class="${(state.active===pIdx && state.editingRound===r)?'cell-editing':''}" onclick="editHistorical(${pIdx}, ${r})">${h.state==='bust'?'0💥':calcTotalScore(h)}</td>`;
     });
-    roundCells += `<td class="${(state.active===pIdx && state.editingRound===null)?'cell-editing':''}" onclick="selectPlayer(${pIdx})">${getDisplayCell(state.current[pIdx])}</td>`;
+    roundCells += `<td class="${(state.active===pIdx && state.editingRound===null)?'cell-editing':''}" onclick="selectPlayer(${pIdx})">${state.current[pIdx].state==='bust'?'0💥':calcTotalScore(state.current[pIdx])}</td>`;
     for(let j=state.history[pIdx].length+1; j<state.round; j++) roundCells += `<td>-</td>`;
     
-    const f7 = state.history[pIdx].filter(h => countUniqueCards(h) >= 7).length + (countUniqueCards(state.current[pIdx]) >= 7 ? 1 : 0);
-    const isWinner = pIdx === winningIdx;
-
-    bodyHtml += `<tr class="${pIdx===state.active?'row-active':''} ${isWinner?'winner-row':''}">
-      <td style="text-align:left; padding-left:10px;" onclick="selectPlayer(${pIdx})">${isWinner?'🎆 ':''}${name}${isWinner?' 🎆':''}${f7>0?`<span class="f7-count">F7: ${f7}</span>`:''}</td>
+    bodyHtml += `<tr class="${pIdx===state.active?'row-active':''} ${pIdx===winningIdx?'winner-row':''}">
+      <td style="text-align:left; padding-left:10px;">${pIdx===winningIdx?'🎆 ':''}${name}</td>
       ${roundCells}
-      <td style="color:var(--gold); border-left: 1px solid var(--border)">${totals[pIdx]}</td>
+      <td style="color:var(--gold); font-weight:bold;">${totals[pIdx]}</td>
     </tr>`;
   });
   document.getElementById('tb-body').innerHTML = bodyHtml;
 
   let gridHtml = ''; const uC = countUniqueCards(activeData);
-  const sel0 = activeData.cards.includes(0);
-  gridHtml += `<button class="btn-num ${sel0?'selected':''} ${(!sel0 && uC>=7)?'disabled':''}" data-n="0" onclick="toggleNum(0)">0</button>`;
-  for(let i=1; i<=12; i++) {
+  for(let i=0; i<=12; i++) {
     const sel = activeData.cards.includes(i);
     gridHtml += `<button class="btn-num ${sel?'selected':''} ${(!sel && uC>=7)?'disabled':''}" data-n="${i}" onclick="toggleNum(${i})">${i}</button>`;
   }
-  
   if (state.mode !== 'flip7') {
     const c13 = activeData.cards.filter(x => x===13).length;
-    gridHtml += `<button class="btn-num ${c13>=1?'selected':''} ${c13===0 && uC>=7?'disabled':''}" data-n="13" onclick="toggleNum(13)">13</button>`;
-    gridHtml += `<button class="btn-num ${c13>=2?'selected':''} ${c13<2 && uC>=7?'disabled':''}" data-n="13" onclick="toggleNum(13)">13</button>`;
+    gridHtml += `<button class="btn-num ${c13>=1?'selected':''} ${c13===0 && uC>=7?'disabled':''}" onclick="toggleNum(13)">13</button>`;
+    gridHtml += `<button class="btn-num ${c13>=2?'selected':''} ${c13<2 && uC>=7?'disabled':''}" onclick="toggleNum(13)">13</button>`;
   }
   document.getElementById('num-grid').innerHTML = gridHtml;
 
   const pos = ['×2','+2','+4','+6','+8','+10'], neg = ['÷2','-2','-4','-6','-8','-10'];
-  document.getElementById('mod-container').innerHTML = (state.mode==='flip7'?renderRow(pos):(state.mode==='vengeance'?renderRow(neg):renderRow(pos)+renderRow(neg)));
+  const rowHtml = (list) => `<div class="mods-row">${list.map(m=>`<button class="btn-mod ${activeData.mods.includes(m)?'active':''}" onclick="toggleMod('${m}')">${m}</button>`).join('')}</div>`;
+  document.getElementById('mod-container').innerHTML = (state.mode==='flip7'?rowHtml(pos):(state.mode==='vengeance'?rowHtml(neg):rowHtml(pos)+rowHtml(neg)));
 }
-
-function renderRow(l) { return `<div class="mods-row">${l.map(m=>`<button class="btn-mod ${(state.editingRound === null ? state.current[state.active] : state.history[state.active][state.editingRound]).mods.includes(m)?'active':''}" onclick="toggleMod('${m}')">${m}</button>`).join('')}</div>`; }
 
 function endRound() {
-  const totals = state.players.map((_, i) => {
-    let t = state.history[i].reduce((sum, h) => sum + calcTotalScore(h), 0);
-    return t + calcTotalScore(state.current[i]);
-  });
-  if (Math.max(...totals) >= 200) {
-    if(confirm("Game Over! Restart this mode with the same players?")) { restartGame(false); }
-    return;
-  }
-  state.players.forEach((_, i) => {
-    state.history[i].push({ ...state.current[i], cards: [...state.current[i].cards], mods: [...state.current[i].mods] });
-  });
-  state.round++;
-  resetCurrent();
-  saveToCache();
-  render();
+  const totals = state.players.map((_, i) => state.history[i].reduce((sum, h) => sum + calcTotalScore(h), 0) + calcTotalScore(state.current[i]));
+  if (Math.max(...totals) >= 200) { if(confirm("Restart session?")) restartGame(false); return; }
+  state.players.forEach((_, i) => state.history[i].push({ ...state.current[i], cards: [...state.current[i].cards], mods: [...state.current[i].mods] }));
+  state.round++; resetCurrent(); saveToCache(); render();
 }
 
-function goHome() {
-  document.getElementById('game-screen').style.display='none';
-  document.getElementById('setup-screen').style.display='flex';
-}
-
-function restartGame(ask) {
-  if(!ask || confirm("Wipe scores and restart this session?")) {
-    state.history = state.players.map(() => []);
-    state.round = 1;
-    resetCurrent();
-    saveToCache();
-    render();
-  }
-}
+function goHome() { document.getElementById('game-screen').style.display='none'; document.getElementById('setup-screen').style.display='flex'; }
+function restartGame(ask) { if(!ask || confirm("Restart?")) { state.history = state.players.map(() => []); state.round = 1; resetCurrent(); saveToCache(); render(); } }
 
 window.onload = loadFromCache;
 </script>
