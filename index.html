@@ -149,6 +149,7 @@
   .btn-num { aspect-ratio: 1; border: 2.5px solid currentColor; background: #fff; border-radius: 8px; font-family: 'Bebas Neue'; font-size: 1.1rem; cursor: pointer; }
   .btn-num.disabled { opacity: 0.1; cursor: not-allowed; }
   .btn-num.selected { background: var(--accent-green) !important; color: #fff !important; border-color: var(--accent-green) !important; }
+  .btn-num[data-n="0"] { color: #94a3b8; }
   .btn-num[data-n="1"] { color: #64748b; } .btn-num[data-n="2"] { color: #849101; }
   .btn-num[data-n="3"] { color: #be123c; } .btn-num[data-n="4"] { color: #0891b2; }
   .btn-num[data-n="5"] { color: #15803d; } .btn-num[data-n="6"] { color: #7e22ce; }
@@ -399,6 +400,8 @@ function render() {
   document.getElementById('tb-body').innerHTML = bodyHtml;
 
   let gridHtml = ''; const uC = countUniqueCards(activeData);
+  const sel0 = activeData.cards.includes(0);
+  gridHtml += `<button class="btn-num ${sel0?'selected':''} ${(!sel0 && uC>=7)?'disabled':''}" data-n="0" onclick="toggleNum(0)">0</button>`;
   for(let i=1; i<=12; i++) {
     const sel = activeData.cards.includes(i);
     gridHtml += `<button class="btn-num ${sel?'selected':''} ${(!sel && uC>=7)?'disabled':''}" data-n="${i}" onclick="toggleNum(${i})">${i}</button>`;
