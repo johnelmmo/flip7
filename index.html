@@ -51,10 +51,10 @@
       height: 100%; 
       overflow: hidden;
       z-index: 2;
-      position: relative; /* Anchor for absolute fireworks */
+      position: relative;
     }
 
-    /* --- CONSTRAINED FIREWORKS SYSTEM --- */
+    /* --- REFINED FIREWORKS SYSTEM --- */
     .fireworks-layer {
       position: absolute;
       top: 0;
@@ -62,8 +62,8 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 1; /* Sits behind the table and controls */
-      overflow: hidden;
+      z-index: 100; /* Bring to front of container */
+      overflow: visible; /* Allow particles to bleed out of the 500px container */
       visibility: hidden;
     }
 
@@ -72,39 +72,39 @@
     }
 
     @keyframes firework {
-      0% { transform: translateY(100vh) scale(0.5); opacity: 1; }
+      0% { transform: translateY(100vh) scale(0.3); opacity: 1; }
       50% { opacity: 1; }
-      100% { transform: translateY(var(--y)) scale(10); opacity: 0; }
+      100% { transform: translateY(var(--y)) scale(5); opacity: 0; }
     }
 
     .firework, .firework::before, .firework::after {
       content: "";
       position: absolute;
       top: 0;
-      width: 5vmin;
+      width: 3vmin; /* Smaller base size */
       aspect-ratio: 1;
       background: 
-        radial-gradient(circle, var(--gold) 0.2vmin, #0000 0) 50% 0%,
-        radial-gradient(circle, var(--accent-green) 0.3vmin, #0000 0) 0% 50%,
-        radial-gradient(circle, var(--gold) 0.5vmin, #0000 0) 50% 99%,
-        radial-gradient(circle, var(--accent-blue) 0.2vmin, #0000 0) 99% 50%,
-        radial-gradient(circle, #fff 0.3vmin, #0000 0) 80% 90%,
-        radial-gradient(circle, var(--gold) 0.5vmin, #0000 0) 95% 90%,
-        radial-gradient(circle, #fff 0.2vmin, #0000 0) 10% 60%,
-        radial-gradient(circle, var(--accent-green) 0.2vmin, #0000 0) 31% 80%;
-      background-size: 0.5vmin 0.5vmin;
+        radial-gradient(circle, var(--gold) 0.15vmin, #0000 0) 50% 0%,
+        radial-gradient(circle, var(--accent-green) 0.15vmin, #0000 0) 0% 50%,
+        radial-gradient(circle, var(--gold) 0.2vmin, #0000 0) 50% 99%,
+        radial-gradient(circle, var(--accent-blue) 0.15vmin, #0000 0) 99% 50%,
+        radial-gradient(circle, #fff 0.15vmin, #0000 0) 80% 90%,
+        radial-gradient(circle, var(--gold) 0.2vmin, #0000 0) 95% 90%,
+        radial-gradient(circle, #fff 0.15vmin, #0000 0) 10% 60%,
+        radial-gradient(circle, var(--accent-green) 0.15vmin, #0000 0) 31% 80%;
+      background-size: 0.4vmin 0.4vmin;
       background-repeat: no-repeat;
     }
 
     body.has-winner .firework, 
     body.has-winner .firework::before, 
     body.has-winner .firework::after { 
-      animation: firework 2s infinite ease-out; 
+      animation: firework 1.8s infinite ease-out; 
     }
 
-    .firework:nth-child(1) { left: 15%; --y: 15vh; }
-    .firework:nth-child(2) { left: 80%; --y: 10vh; animation-delay: -0.5s; }
-    .firework:nth-child(3) { left: 50%; --y: 25vh; animation-delay: -1.2s; }
+    .firework:nth-child(1) { left: 10%; --y: 15vh; }
+    .firework:nth-child(2) { left: 90%; --y: 10vh; animation-delay: -0.4s; }
+    .firework:nth-child(3) { left: 50%; --y: 20vh; animation-delay: -1.1s; }
 
     /* SETUP SCREEN */
     #setup-screen { padding: 40px 24px; flex: 1; display: flex; flex-direction: column; width: 100%; overflow-y: auto; z-index: 10; }
